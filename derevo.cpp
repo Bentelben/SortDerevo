@@ -8,11 +8,18 @@
 
 static void LogEvent(derevo_t *derevo, char const *name, char const *body);
 
-void DerevoInitialize(derevo_t *const derevo, travesal_function_t const elementValueDumpingTravesalFunctionPointer, travesal_function_t const graphDataWritingTravesalFunctionPointer) {
+void DerevoInitialize(
+    derevo_t *const derevo,
+    travesal_function_t const elementValueDumpingTravesalFunctionPointer,
+    travesal_function_t const graphDataWritingTravesalFunctionPointer,
+    travesal_function_t const nodeFreeingTravesalFunctionPointer
+) {
     assert(derevo);
 
     derevo->elementValueDumpingTravesalFunctionPointer = elementValueDumpingTravesalFunctionPointer; 
     derevo->graphDataWritingTravesalFunctionPointer = graphDataWritingTravesalFunctionPointer;
+    derevo->nodeFreeingTravesalFunctionPointer = nodeFreeingTravesalFunctionPointer;
+
 
     LoggerInitialize(&derevo->logger);
     LogEvent(derevo, "Intialize", "");
@@ -37,24 +44,34 @@ derevo_node_t** DerevoPushNode(derevo_t *const derevo, derevo_node_t **const des
     return destination;
 }
 
-static void DerevoFreeNode(derevo_node_t *const node) {
-    if (node == NULL)
-        return;
-    derevo_node_t *const left = node->left;
-    derevo_node_t *const right = node->right;
-    free(node);
-    DerevoFreeNode(left); // TODO maybe do with travesal
-    DerevoFreeNode(right);
+
+static bool DerevoFreeNodePostorderTravesalFunction(derevo_node_t **const node, void *const args) {
+    derevo_t const *derevo = (derevo_t *)args;
+    if (derevo->nodeFreeingTravesalFunctionPointer != NULL)
+        derevo->nodeFreeingTravesalFunctionPointer(node, NULL);
+    free(*node);
+    *node = NULL;
+    return true;
+}
+
+static void DerevoFreeNode(derevo_t *const derevo, derevo_node_t **const node) {
+    DerevoDoTravesal(
+        node,
+        NULL, NULL,
+        NULL, NULL,
+        NULL, NULL,
+        NULL, NULL,
+        DerevoFreeNodePostorderTravesalFunction, (void *)derevo
+    );
 }
 
 void DerevoPopNode(derevo_t *const derevo, derevo_node_t **const node) {
     LogEvent(derevo, "Before POP", "");
-    DerevoFreeNode(*node);
-    *node = NULL;
+    DerevoFreeNode(derevo, node);
     LogEvent(derevo, "After POP", "");
 }
 
-static derevo_node_t **Travesal(
+derevo_node_t **DerevoDoTravesal(
     derevo_node_t **const node,
     travesal_function_t const leftSelectorFunctionPointer,  void *const leftSelectorArgs,
     travesal_function_t const rightSelectorFunctionPointer, void *const rightSelectorArgs,
@@ -70,7 +87,7 @@ static derevo_node_t **Travesal(
 
     bool const shouldGoLeft = leftSelectorFunctionPointer == NULL ? (*node)->left != NULL : leftSelectorFunctionPointer(node, leftSelectorArgs);
     if (shouldGoLeft) {
-        derevo_node_t **leftResult = Travesal(
+        derevo_node_t **leftResult = DerevoDoTravesal(
             &(*node)->left,
             leftSelectorFunctionPointer, leftSelectorArgs,
             rightSelectorFunctionPointer, rightSelectorArgs,
@@ -87,7 +104,7 @@ static derevo_node_t **Travesal(
 
     bool const shouldGoRight = rightSelectorFunctionPointer == NULL ? (*node)->right != NULL : rightSelectorFunctionPointer(node, rightSelectorArgs);
     if (shouldGoRight) {
-        derevo_node_t **rightResult = Travesal(
+        derevo_node_t **rightResult = DerevoDoTravesal(
             &(*node)->right,
             leftSelectorFunctionPointer, leftSelectorArgs,
             rightSelectorFunctionPointer, rightSelectorArgs,
@@ -105,27 +122,9 @@ static derevo_node_t **Travesal(
     return NULL;
 }
 
-derevo_node_t **DerevoDoTravesal(
-    derevo_t *const derevo,
-    travesal_function_t const leftSelectorFunctionPointer,  void *const leftSelectorArgs,
-    travesal_function_t const rightSelectorFunctionPointer, void *const rightSelectorArgs,
-    travesal_function_t const preorderFunctionPointer,      void *const preorderArgs, 
-    travesal_function_t const inorderFunctionPointer,       void *const inorderArgs,
-    travesal_function_t const postorderFunctionPointer,     void *const postorderArgs
-) {
-    return Travesal(
-        &derevo->head,
-        leftSelectorFunctionPointer, leftSelectorArgs,
-        rightSelectorFunctionPointer, rightSelectorArgs,
-        preorderFunctionPointer, preorderArgs,
-        inorderFunctionPointer, inorderArgs,
-        postorderFunctionPointer, postorderArgs
-    );
-}
-
 void DerevoFinalize(derevo_t *const derevo) {
     LogEvent(derevo, "Finalize", "");
-    DerevoFreeNode(derevo->head);
+    DerevoFreeNode(derevo, &derevo->head);
 }
 
 
@@ -133,7 +132,7 @@ void DerevoFinalize(derevo_t *const derevo) {
 
 static void WriteGraphData(derevo_t *const derevo, FILE *const file) {
     fprintf(file, "digraph {\n");
-    DerevoDoTravesal(derevo, NULL, NULL, NULL, NULL, derevo->graphDataWritingTravesalFunctionPointer, (void *)file, NULL, NULL, NULL, NULL);
+    DerevoDoTravesal(&derevo->head, NULL, NULL, NULL, NULL, derevo->graphDataWritingTravesalFunctionPointer, (void *)file, NULL, NULL, NULL, NULL);
     fprintf(file, "}");
 }
 
@@ -192,7 +191,7 @@ static void LogEvent(derevo_t *const derevo, char const *const name, char const 
             derevo->elementValueDumpingTravesalFunctionPointer
         };
         DerevoDoTravesal(
-            derevo, 
+            &derevo->head, 
             NULL, NULL, 
             NULL, NULL, 
             DerevoDumpPreorderTravesalFunction, (void *)&preorderArgs, 

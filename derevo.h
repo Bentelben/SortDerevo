@@ -20,13 +20,15 @@ struct derevo_t {
     logger_t logger;
     travesal_function_t elementValueDumpingTravesalFunctionPointer; // As args must accept file pointer
     travesal_function_t graphDataWritingTravesalFunctionPointer; // As args must accept file pointer
+    travesal_function_t nodeFreeingTravesalFunctionPointer; // Must accept NULL args
 };
 
 
 void DerevoInitialize(
     derevo_t *derevo,
     travesal_function_t elementValueDumpingTravesalFunctionPointer,
-    travesal_function_t graphDataWritingTravesalFunctionPointer
+    travesal_function_t graphDataWritingTravesalFunctionPointer,
+    travesal_function_t nodeFreeingTravesalFunctionPointer
 );
 
 derevo_node_t** DerevoPushNode(
@@ -41,7 +43,7 @@ void DerevoPopNode(
 );
 
 derevo_node_t **DerevoDoTravesal(
-    derevo_t *derevo,
+    derevo_node_t **derevo,
     travesal_function_t leftSelectorFunctionPointer,  void *leftSelectorArgs,
     travesal_function_t rightSelectorFunctionPointer, void *rightSelectorArgs,
     travesal_function_t preorderFunctionPointer,      void *preorderArgs, 

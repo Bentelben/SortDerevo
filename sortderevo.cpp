@@ -36,7 +36,7 @@ derevo_node_t** SortDerevoPush(derevo_t *const derevo, int value) {
     assert(derevo);
 
     derevo_node_t **cursor = DerevoDoTravesal(
-        derevo,
+        &derevo->head,
         SortPushLeftSelector, &value,
         SortPushRightSelector, &value,
         NULL, NULL,
@@ -48,7 +48,7 @@ derevo_node_t** SortDerevoPush(derevo_t *const derevo, int value) {
 }
 
 void SortDerevoInitialize(derevo_t *const derevo) {
-    DerevoInitialize(derevo, DumpValue, WriteNodeGraphData);
+    DerevoInitialize(derevo, DumpValue, WriteNodeGraphData, NULL);
 }
 
 static bool PrintValue(derevo_node_t **const node, void *const args) {
@@ -58,7 +58,7 @@ static bool PrintValue(derevo_node_t **const node, void *const args) {
 }
 void SortDerevoFPrint(derevo_t *const derevo, FILE *const file) {
     DerevoDoTravesal(
-        derevo,
+        &derevo->head,
         NULL, NULL,
         NULL, NULL,
         NULL, NULL,
