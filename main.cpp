@@ -9,7 +9,7 @@ int main() {
     SortDerevoPush(&derevo, -8);
     derevo_node_t **node = SortDerevoPush(&derevo, 13);
     DerevoPopNode(&derevo, node);
-    DerevoDump(&derevo);
+    DerevoLog(&derevo);
     SortDerevoFPrint(&derevo, stdout);
     DerevoFinalize(&derevo);
 }

@@ -165,6 +165,21 @@ static bool DerevoDumpPostorderTravesalFunction(derevo_node_t **, void *args) {
     return true;
 }
 
+void DerevoDump(derevo_t *const derevo, FILE *const file) {
+    derevo_dump_preorder_travesal_function_args preorderArgs = {
+        file,
+        derevo->elementValueDumpingTravesalFunctionPointer
+    };
+    DerevoDoTravesal(
+        &derevo->head, 
+        NULL, NULL, 
+        NULL, NULL, 
+        DerevoDumpPreorderTravesalFunction, (void *)&preorderArgs, 
+        DerevoDumpInorderTravesalFunction, (void *)file, 
+        DerevoDumpPostorderTravesalFunction, (void *)file
+   );
+}
+
 static void LogEvent(derevo_t *const derevo, char const *const name, char const *const body) {
     static size_t id = 0;
 
@@ -185,20 +200,7 @@ static void LogEvent(derevo_t *const derevo, char const *const name, char const 
     FILE *file = LoggerStartEvent(derevo->logger, name);
     fprintf(file, "%s\n", body);
 
-    {
-        derevo_dump_preorder_travesal_function_args preorderArgs = {
-            file,
-            derevo->elementValueDumpingTravesalFunctionPointer
-        };
-        DerevoDoTravesal(
-            &derevo->head, 
-            NULL, NULL, 
-            NULL, NULL, 
-            DerevoDumpPreorderTravesalFunction, (void *)&preorderArgs, 
-            DerevoDumpInorderTravesalFunction, (void *)file, 
-            DerevoDumpPostorderTravesalFunction, (void *)file
-       );
-    }
+    DerevoDump(derevo, file);
 
     fprintf(file, "\n");
     
@@ -207,6 +209,6 @@ static void LogEvent(derevo_t *const derevo, char const *const name, char const 
     id++;
 }
 
-void DerevoDump(derevo_t *const derevo) {
-    LogEvent(derevo, "dump", "");
+void DerevoLog(derevo_t *const derevo) {
+    LogEvent(derevo, "log", "");
 }

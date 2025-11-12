@@ -56,6 +56,11 @@ void DerevoFinalize(
 );
 
 void DerevoDump(
+    derevo_t *derevo,
+    FILE *file
+);
+
+void DerevoLog(
     derevo_t *derevo
 );
 
