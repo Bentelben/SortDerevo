@@ -29,7 +29,7 @@ derevo_node_t** DerevoPushNode(derevo_t *const derevo, derevo_node_t **const des
     assert(derevo);
     assert(destination);
 
-    LogEvent(derevo, "Before PUSH left", "");
+    LogEvent(derevo, "Before PUSH", "");
 
     assert(*destination == NULL);
     *destination = (derevo_node_t *)calloc(1, sizeof(**destination));
@@ -40,7 +40,7 @@ derevo_node_t** DerevoPushNode(derevo_t *const derevo, derevo_node_t **const des
     (*destination)->left = NULL;
     (*destination)->right = NULL;
 
-    LogEvent(derevo, "After PUSH left", "");
+    LogEvent(derevo, "After PUSH", "");
     return destination;
 }
 
