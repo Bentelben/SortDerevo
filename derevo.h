@@ -24,6 +24,12 @@ struct derevo_t {
 };
 
 
+void LogEvent(
+    derevo_t *derevo,
+    char const *name,
+    char const *body
+);
+
 void DerevoInitialize(
     derevo_t *derevo,
     travesal_function_t elementValueDumpingTravesalFunctionPointer,

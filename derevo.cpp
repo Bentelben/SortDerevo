@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-static void LogEvent(derevo_t *derevo, char const *name, char const *body);
-
 void DerevoInitialize(
     derevo_t *const derevo,
     travesal_function_t const elementValueDumpingTravesalFunctionPointer,
@@ -180,7 +178,7 @@ void DerevoDump(derevo_t *const derevo, FILE *const file) {
    );
 }
 
-static void LogEvent(derevo_t *const derevo, char const *const name, char const *const body) {
+void LogEvent(derevo_t *const derevo, char const *const name, char const *const body) {
     static size_t id = 0;
 
     {
