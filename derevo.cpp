@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-struct derevo_dump_preorder_travesal_function_args {
+struct derevo_dump_travesal_function_args_t {
     FILE *file;
     travesal_function_t elementValueDumpingTravesalFunctionPointer;
 };
@@ -73,11 +73,10 @@ static void DerevoFreeNode(derevo_t *const derevo, derevo_node_t **const node) {
 
     DerevoDoTravesal(
         node,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL,
-        DerevoFreeNodePostorderTravesalFunction, (void *)derevo
+        NULL,
+        NULL,
+        DerevoFreeNodePostorderTravesalFunction,
+        (void *)derevo
     );
 }
 
@@ -92,50 +91,45 @@ void DerevoPopNode(derevo_t *const derevo, derevo_node_t **const node) {
 
 derevo_node_t **DerevoDoTravesal(
     derevo_node_t **const node,
-    travesal_function_t const leftSelectorFunctionPointer,  void *const leftSelectorArgs,
-    travesal_function_t const rightSelectorFunctionPointer, void *const rightSelectorArgs,
-    travesal_function_t const preorderFunctionPointer,      void *const preorderArgs,
-    travesal_function_t const inorderFunctionPointer,       void *const inorderArgs,
-    travesal_function_t const postorderFunctionPointer,     void *const postorderArgs
+    travesal_function_t const preorderFunctionPointer,
+    travesal_function_t const inorderFunctionPointer,
+    travesal_function_t const postorderFunctionPointer,
+    void *const args
 ) {
     if (*node == NULL)
         return node;
 
-    if (preorderFunctionPointer != NULL && !preorderFunctionPointer(node, preorderArgs))
+    if (preorderFunctionPointer != NULL && !preorderFunctionPointer(node, args))
         return node;
 
-    bool const shouldGoLeft = leftSelectorFunctionPointer == NULL ? (*node)->left != NULL : leftSelectorFunctionPointer(node, leftSelectorArgs);
-    if (shouldGoLeft) {
+    if ((*node)->left != NULL) {
         derevo_node_t **leftResult = DerevoDoTravesal(
             &(*node)->left,
-            leftSelectorFunctionPointer, leftSelectorArgs,
-            rightSelectorFunctionPointer, rightSelectorArgs,
-            preorderFunctionPointer, preorderArgs,
-            inorderFunctionPointer, inorderArgs,
-            postorderFunctionPointer, postorderArgs
+            preorderFunctionPointer,
+            inorderFunctionPointer,
+            postorderFunctionPointer,
+            args
         );
         if (leftResult != NULL)
             return leftResult;
     }
 
-    if (inorderFunctionPointer != NULL && !inorderFunctionPointer(node, inorderArgs))
+    if (inorderFunctionPointer != NULL && !inorderFunctionPointer(node, args))
         return node;
 
-    bool const shouldGoRight = rightSelectorFunctionPointer == NULL ? (*node)->right != NULL : rightSelectorFunctionPointer(node, rightSelectorArgs);
-    if (shouldGoRight) {
+    if ((*node)->right != NULL) {
         derevo_node_t **rightResult = DerevoDoTravesal(
             &(*node)->right,
-            leftSelectorFunctionPointer, leftSelectorArgs,
-            rightSelectorFunctionPointer, rightSelectorArgs,
-            preorderFunctionPointer, preorderArgs,
-            inorderFunctionPointer, inorderArgs,
-            postorderFunctionPointer, postorderArgs
+            preorderFunctionPointer,
+            inorderFunctionPointer,
+            postorderFunctionPointer,
+            args
         );
         if (rightResult != NULL)
             return rightResult;
     }
 
-    if (postorderFunctionPointer != NULL && !postorderFunctionPointer(node, postorderArgs))
+    if (postorderFunctionPointer != NULL && !postorderFunctionPointer(node, args))
         return node;
 
     return NULL;
@@ -155,31 +149,31 @@ static bool DerevoDumpPreorderTravesalFunction(derevo_node_t **const node, void 
     assert(node);
     assert(rawArgs);
 
-    derevo_dump_preorder_travesal_function_args *args = (derevo_dump_preorder_travesal_function_args *)rawArgs; 
+    derevo_dump_travesal_function_args_t *const args = (derevo_dump_travesal_function_args_t *)rawArgs; 
     fprintf(args->file, "(");
     args->elementValueDumpingTravesalFunctionPointer(node, args->file);
     fprintf(args->file, " ");
     return true;
 }
 
-static bool DerevoDumpInorderTravesalFunction(derevo_node_t **const node, void *const args) {
+static bool DerevoDumpInorderTravesalFunction(derevo_node_t **const node, void *const rawArgs) {
     assert(node);
-    assert(args);
+    assert(rawArgs);
 
-    FILE *const file = (FILE *)args;
+    derevo_dump_travesal_function_args_t *const args = (derevo_dump_travesal_function_args_t *)rawArgs; 
     if ((*node)->left == NULL)
-        fprintf(file, "()");
-    fprintf(file, " ");
+        fprintf(args->file, "()");
+    fprintf(args->file, " ");
     if ((*node)->right == NULL)
-        fprintf(file, "()");
+        fprintf(args->file, "()");
     return true;
 }
 
-static bool DerevoDumpPostorderTravesalFunction(derevo_node_t **, void *const args) {
-    assert(args);
+static bool DerevoDumpPostorderTravesalFunction(derevo_node_t **, void *const rawArgs) {
+    assert(rawArgs);
 
-    FILE *file = (FILE *)args;
-    fprintf(file, ")");
+    derevo_dump_travesal_function_args_t *const args = (derevo_dump_travesal_function_args_t *)rawArgs; 
+    fprintf(args->file, ")");
     return true;
 }
 
@@ -187,17 +181,16 @@ void DerevoDump(derevo_t *const derevo, FILE *const file) {
     assert(derevo);
     assert(file);
 
-    derevo_dump_preorder_travesal_function_args preorderArgs = {
+    derevo_dump_travesal_function_args_t args = {
         file,
         derevo->elementValueDumpingTravesalFunctionPointer
     };
     DerevoDoTravesal(
         &derevo->head, 
-        NULL, NULL, 
-        NULL, NULL, 
-        DerevoDumpPreorderTravesalFunction, (void *)&preorderArgs, 
-        DerevoDumpInorderTravesalFunction, (void *)file, 
-        DerevoDumpPostorderTravesalFunction, (void *)file
+        DerevoDumpPreorderTravesalFunction,
+        DerevoDumpInorderTravesalFunction,
+        DerevoDumpPostorderTravesalFunction,
+        &args
    );
 }
 
@@ -211,7 +204,13 @@ static int WriteGraphData(derevo_t *const derevo, size_t const id) {
         return -1;
 
     fprintf(file, "digraph {\n");
-    DerevoDoTravesal(&derevo->head, NULL, NULL, NULL, NULL, derevo->graphDataWritingTravesalFunctionPointer, (void *)file, NULL, NULL, NULL, NULL);
+    DerevoDoTravesal(
+        &derevo->head, 
+        derevo->graphDataWritingTravesalFunctionPointer, 
+        NULL,
+        NULL,
+        (void *)file
+    );
     fprintf(file, "}");
 
     fclose(file);

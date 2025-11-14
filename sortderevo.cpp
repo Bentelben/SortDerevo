@@ -7,8 +7,6 @@
 
 static bool DumpValue(derevo_node_t **node, void *args);
 static bool WriteNodeGraphData(derevo_node_t **node, void *args);
-static bool SortPushLeftSelector(derevo_node_t **node, void *args);
-static bool SortPushRightSelector(derevo_node_t **node, void *args);
 static bool PrintValue(derevo_node_t **node, void *args);
 
 static bool DumpValue(derevo_node_t **const node, void *const args) {
@@ -33,34 +31,16 @@ static bool WriteNodeGraphData(derevo_node_t **const node, void *const args) {
     return true;
 }
 
-
-static bool SortPushLeftSelector(derevo_node_t **const node, void *const args) {
-    assert(node);
-    assert(args);
-
-    int const pushValue = *(int *)args;
-    return pushValue <= (*node)->value;
-}
-
-static bool SortPushRightSelector(derevo_node_t **const node, void *const args) {
-    assert(node);
-    assert(args);
-
-    int const pushValue = *(int *)args;
-    return pushValue > (*node)->value;
-}
-
-derevo_node_t** SortDerevoPush(derevo_t *const derevo, int value) {
+derevo_node_t** SortDerevoInsert(derevo_t *const derevo, int value) {
     assert(derevo);
 
-    derevo_node_t **const cursor = DerevoDoTravesal(
-        &derevo->head,
-        SortPushLeftSelector, &value,
-        SortPushRightSelector, &value,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL
-    );
+    derevo_node_t **cursor = &derevo->head;
+    while (*cursor != NULL) {
+        if (value <= (*cursor)->value)
+            cursor = &(*cursor)->left;
+        else
+            cursor = &(*cursor)->right;
+    }
 
     return DerevoInsertNode(derevo, cursor, value);
 }
@@ -85,11 +65,10 @@ void SortDerevoFPrint(derevo_t *const derevo, FILE *const file) {
 
     DerevoDoTravesal(
         &derevo->head,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL,
-        PrintValue, (void *)file,
-        NULL, NULL
+        NULL,
+        PrintValue,
+        NULL,
+        (void *)file
     );
     fprintf(file, "\n");
 }

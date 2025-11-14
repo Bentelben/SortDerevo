@@ -50,11 +50,10 @@ void DerevoPopNode(
 
 derevo_node_t **DerevoDoTravesal(
     derevo_node_t **derevo,
-    travesal_function_t leftSelectorFunctionPointer,  void *leftSelectorArgs,
-    travesal_function_t rightSelectorFunctionPointer, void *rightSelectorArgs,
-    travesal_function_t preorderFunctionPointer,      void *preorderArgs, 
-    travesal_function_t inorderFunctionPointer,       void *inorderArgs,
-    travesal_function_t postorderFunctionPointer,     void *postorderArgs
+    travesal_function_t preorderFunctionPointer,
+    travesal_function_t inorderFunctionPointer,
+    travesal_function_t postorderFunctionPointer,
+    void *args
 );
 
 void DerevoFinalize(
