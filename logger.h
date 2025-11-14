@@ -13,7 +13,7 @@ struct logger_t {
 };
 
 FILE *LoggerOpenLogFile(logger_t logger, char const *name, char const *mode);
-void LoggerInitialize(logger_t *logger);
+int LoggerInitialize(logger_t *logger);
 FILE *LoggerStartEvent(logger_t logger, char const *title);
 void LoggerEndEvent(logger_t logger, FILE *file);
 

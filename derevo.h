@@ -37,7 +37,7 @@ void DerevoInitialize(
     travesal_function_t nodeFreeingTravesalFunctionPointer
 );
 
-derevo_node_t** DerevoPushNode(
+derevo_node_t** DerevoInsertNode(
     derevo_t *derevo,
     derevo_node_t **destination,
     derevo_elem_t value
