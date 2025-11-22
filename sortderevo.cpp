@@ -42,7 +42,7 @@ derevo_node_t** SortDerevoInsert(derevo_t *const derevo, int value) {
             cursor = &(*cursor)->right;
     }
 
-    return DerevoInsertNode(derevo, cursor, value);
+    return DerevoInsert(derevo, cursor, value);
 }
 
 void SortDerevoInitialize(derevo_t *const derevo) {

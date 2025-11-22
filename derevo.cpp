@@ -11,6 +11,7 @@ struct derevo_dump_travesal_function_args_t {
     travesal_function_t elementValueDumpingTravesalFunctionPointer;
 };
 
+static derevo_node_t *DerevoAllocateNode(derevo_elem_t value);
 static bool DerevoFreeNodePostorderTravesalFunction(derevo_node_t **node, void *args);
 static void DerevoFreeNode(derevo_t *derevo, derevo_node_t **node);
 static int WriteGraphData(derevo_t *derevo, size_t id);
@@ -36,23 +37,54 @@ void DerevoInitialize(
     LogEvent(derevo, "Intialize", "");
 }
 
-derevo_node_t** DerevoInsertNode(derevo_t *const derevo, derevo_node_t **const destination, derevo_elem_t value) {
+static derevo_node_t *DerevoAllocateNode(derevo_elem_t value) {
+    derevo_node_t *result = (derevo_node_t *)calloc(1, sizeof(derevo_node_t));
+    if (result == NULL)
+        return NULL;
+
+    result->value = value;
+    return result;
+}
+
+derevo_node_t **DerevoInsert(derevo_t *const derevo, derevo_node_t **const destination, derevo_elem_t const value) {
     assert(derevo);
     assert(destination);
 
-    LogEvent(derevo, "Before PUSH", "");
+    if (*destination != NULL) {
+        LogEvent(derevo, "INSERT FAILED", "destination already has node");
+        return NULL;
+    }
 
-    assert(*destination == NULL);
-    *destination = (derevo_node_t *)calloc(1, sizeof(**destination));
+    LogEvent(derevo, "Before INSERT", "");
+
+    *destination = DerevoAllocateNode(value);
     if (*destination == NULL)
         return NULL;
-    
-    (*destination)->value = value;
-    (*destination)->left = NULL;
-    (*destination)->right = NULL;
 
-    LogEvent(derevo, "After PUSH", "");
+    LogEvent(derevo, "After INSERT", "");
     return destination;
+}
+
+derevo_node_t **DerevoInsertLeft(derevo_t *const derevo, derevo_node_t *const parent, derevo_elem_t const value) {
+    assert(derevo);
+    assert(parent);
+
+    if (DerevoInsert(derevo, &parent->left, value) == NULL)
+        return NULL;
+    parent->left->parent = parent;
+
+    return &parent->left;
+}
+
+derevo_node_t **DerevoInsertRight(derevo_t *const derevo, derevo_node_t *const parent, derevo_elem_t const value) {
+    assert(derevo);
+    assert(parent);
+
+    if (DerevoInsert(derevo, &parent->right, value) == NULL)
+        return NULL;
+    parent->right->parent = parent;
+
+    return &parent->right;
 }
 
 static bool DerevoFreeNodePostorderTravesalFunction(derevo_node_t **const node, void *const args) {

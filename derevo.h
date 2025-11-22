@@ -11,6 +11,7 @@ struct derevo_node_t {
     derevo_elem_t value;
     derevo_node_t *left;
     derevo_node_t *right;
+    derevo_node_t *parent;
 };
 
 typedef bool (*travesal_function_t)(derevo_node_t **, void *args);
@@ -37,11 +38,9 @@ void DerevoInitialize(
     travesal_function_t nodeFreeingTravesalFunctionPointer
 );
 
-derevo_node_t** DerevoInsertNode(
-    derevo_t *derevo,
-    derevo_node_t **destination,
-    derevo_elem_t value
-);
+derevo_node_t **DerevoInsert(derevo_t *derevo, derevo_node_t **destination, derevo_elem_t value);
+derevo_node_t **DerevoInsertLeft(derevo_t *derevo, derevo_node_t *parent, derevo_elem_t value);
+derevo_node_t **DerevoInsertRight(derevo_t *derevo, derevo_node_t *parent, derevo_elem_t value);
 
 void DerevoPopNode(
     derevo_t *derevo,
