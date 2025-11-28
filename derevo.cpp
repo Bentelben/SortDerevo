@@ -11,7 +11,6 @@ struct derevo_dump_travesal_function_args_t {
     travesal_function_t elementValueDumpingTravesalFunctionPointer;
 };
 
-static derevo_node_t *DerevoAllocateNode(derevo_elem_t value);
 static bool DerevoFreeNodePostorderTravesalFunction(derevo_node_t **node, void *args);
 static void DerevoFreeNode(derevo_t *derevo, derevo_node_t **node);
 static int WriteGraphData(derevo_t *derevo, size_t id);
@@ -37,8 +36,8 @@ void DerevoInitialize(
     LogEvent(derevo, "Intialize", "");
 }
 
-static derevo_node_t *DerevoAllocateNode(derevo_elem_t value) {
-    derevo_node_t *result = (derevo_node_t *)calloc(1, sizeof(derevo_node_t));
+derevo_node_t *DerevoAllocateNode(derevo_elem_t const value) {
+    derevo_node_t *const result = (derevo_node_t *)calloc(1, sizeof(derevo_node_t));
     if (result == NULL)
         return NULL;
 

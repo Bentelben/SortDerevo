@@ -38,6 +38,7 @@ void DerevoInitialize(
     travesal_function_t nodeFreeingTravesalFunctionPointer
 );
 
+derevo_node_t *DerevoAllocateNode(derevo_elem_t value);
 derevo_node_t **DerevoInsert(derevo_t *derevo, derevo_node_t **destination, derevo_elem_t value);
 derevo_node_t **DerevoInsertLeft(derevo_t *derevo, derevo_node_t *parent, derevo_elem_t value);
 derevo_node_t **DerevoInsertRight(derevo_t *derevo, derevo_node_t *parent, derevo_elem_t value);
