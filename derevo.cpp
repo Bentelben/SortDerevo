@@ -121,6 +121,20 @@ void DerevoPopNode(derevo_t *const derevo, derevo_node_t **const node) {
     LogEvent(derevo, "After POP", "");
 }
 
+derevo_node_t *DerevoCopyNode(derevo_node_t *const original) {
+    assert(original);
+
+    derevo_node_t *const copy = (derevo_node_t *)calloc(1, sizeof(*copy));
+    copy->value = original->value;
+
+    if (original->left != NULL)
+        copy->left = DerevoCopyNode(original->left);
+    if (original->right != NULL)
+        copy->right = DerevoCopyNode(original->right);
+
+    return copy;
+}
+
 derevo_node_t **DerevoDoTravesal(
     derevo_node_t **const node,
     travesal_function_t const preorderFunctionPointer,

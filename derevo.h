@@ -47,6 +47,10 @@ void DerevoPopNode(
     derevo_node_t **node
 );
 
+derevo_node_t *DerevoCopyNode(
+    derevo_node_t *original
+);
+
 derevo_node_t **DerevoDoTravesal(
     derevo_node_t **derevo,
     travesal_function_t preorderFunctionPointer,
