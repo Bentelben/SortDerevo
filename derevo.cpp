@@ -124,12 +124,20 @@ derevo_node_t *DerevoCopyNode(derevo_node_t *const original) {
     assert(original);
 
     derevo_node_t *const copy = (derevo_node_t *)calloc(1, sizeof(*copy));
+    if (copy == NULL)
+        return NULL;
     copy->value = original->value;
 
-    if (original->left != NULL)
+    if (original->left != NULL) {
         copy->left = DerevoCopyNode(original->left);
-    if (original->right != NULL)
+        if (copy->left != NULL)
+            copy->left->parent = copy;
+    }
+    if (original->right != NULL) {
         copy->right = DerevoCopyNode(original->right);
+        if (copy->right != NULL)
+            copy->right->parent = copy;
+    }
 
     return copy;
 }
